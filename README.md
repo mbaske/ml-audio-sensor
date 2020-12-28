@@ -108,6 +108,7 @@ Click the `Calibrate` button and enter play mode to start fine-tuning the sensor
 ![Amplitude](Images/sensor_amp.png)
 
 A low `Floor` value results in a higher average level, but with little dynamic range. Here's an example of brown noise spectrum data, scaled with the smallest floor value. 
+
 ![Amplitude](Images/sensor_fft_low_floor.png)
 
 Upping the floor value increases dynamics, quieter signals might disappear though. Tweak this value with different sounds the agent is expected to hear during training, in order to achieve an expressive dynamic range. The observation preview texture reflects signal dynamics as well.
