@@ -38,9 +38,9 @@ Mono:   10 batches * 1024 samples => 10 channels * 32 (width) * 32 (height)
 Stereo: 10 batches * 2048 samples => 20 channels * 32 (width) * 32 (height)
 ```
 
-When sampling spectrum data, a batch contains values for a set number of frequency bands, representing a spectrum snapshot over that time period. If we sample raw amplitude values on the other hand, the number of samples depends on the system's sample rate. Unity on Windows uses 48kHz, a 20ms batch should therefore contain 48000 * 0.02 = 960 samples per channel. However, [GetOutputData](https://docs.unity3d.com/ScriptReference/AudioListener.GetOutputData.html) requires sample sizes of a power of 2, so we actually sample 1024 values, resulting in a small overlap between batches. Alternatively, one could fill the buffer from the audio thread, using [OnAudioFilterRead](https://docs.unity3d.com/ScriptReference/MonoBehaviour.OnAudioFilterRead.html). I've opted for the main thread though, because it's easier to keep sample data synced with the agent loop this way.
+When sampling spectrum data, a batch contains values for a set number of frequency bands, representing a spectrum snapshot over that time period. If we sample amplitude values on the other hand, the number of samples depends on the system's sample rate. Unity on Windows uses 48kHz, a 20ms batch should therefore contain 48000 * 0.02 = 960 samples per channel. However, [GetOutputData](https://docs.unity3d.com/ScriptReference/AudioListener.GetOutputData.html) requires sample sizes of a power of 2, so we actually sample 1024 values, resulting in a small overlap between batches. Alternatively, one could fill the buffer from the audio thread, using [OnAudioFilterRead](https://docs.unity3d.com/ScriptReference/MonoBehaviour.OnAudioFilterRead.html). I've opted for the main thread though, because it's easier to keep buffer contents synced with the agent loop this way.
 
-Since the audio sensor component implements its own update mechanism based on `AgentPreStep` events, I recommend binding agent decisions to those updates, rather than using the ML-Agents decision requester component. The audio sensor component dispatches a `SamplingUpdateEvent`, containing the current sampling step count with respect to to the buffer length. The agent should listen to this event and request decisions accordingly, as the latest batch of audio samples will be available when it is invoked. Check out the [example projects](#Examples) for how this can be implemented in practice.
+Since the audio sensor component implements its own update mechanism based on `AgentPreStep` events, I recommend binding agent decisions to those updates, rather than using the ML-Agents decision requester component. The audio sensor component dispatches a `SamplingUpdateEvent`, containing the current sampling step count with respect to to the buffer length. The agent should listen to this event and request decisions accordingly, as the latest sample batch will be available when it is invoked. Check out the [example projects](#Examples) for how this can be implemented in practice.
 
 To enable **observation stacking**, set the buffer length to `decision interval * stacking size`. Buffer contents are read from oldest to newest. With a decision interval of 5 and a buffer length of 10 for instance, the agent would observe the following sample batches, corresponding to a stacking size of 2.
 ```
@@ -92,7 +92,8 @@ scaled amplitude = max(dB, floor) / -floor + 1
 
 Whether to normalize the samples. Normalization is implemented as upward expansion over the full dynamic range, based on the measured signal peaks. When sampling spectrum data, each FFT band is normalized individually.
 ```
-normalized amplitude = scaled amplitude * 0.99 / measured peak of scaled amplitudes
+expansion factor = 0.99 / measured peak of scaled amplitudes
+normalized amplitude = scaled amplitude * expansion factor
 ```
 <br/>
 
@@ -110,7 +111,7 @@ A low `Floor` value results in a higher average level, but with little dynamic r
 
 ![Amplitude](Images/sensor_fft_low_floor.png)
 
-Upping the floor value increases dynamics, quieter signals might disappear though. Tweak this value with different sounds the agent is expected to hear during training, in order to achieve an expressive dynamic range. The observation preview texture reflects signal dynamics as well.
+Upping the floor increases dynamics, quieter signals might disappear though. Tweak this value with different sounds the agent is expected to hear during training, in order to achieve an expressive dynamic range. The observation preview texture reflects signal dynamics as well.
 
 ![Amplitude](Images/sensor_fft_med_floor.png)
 
@@ -122,7 +123,7 @@ Normalization *increases* the dynamic range, as it multiplies sample values with
 
 **Don't forget to copy your updated settings with 'Copy Component' while still in play mode. Back in editor mode, save them with 'Paste Component Values'.**
 
-Note that any changes which result in a different observation size can cause errors if the agent is in training or inference mode, because the model then no longer matches the new settings.
+Note that any changes which result in a different observation size can cause errors while the agent is in training or inference mode, because the model then no longer matches the new settings.
 
 Calibration creates some overhead at each sampling step and should be disabled during training.
 <br/><br/>
