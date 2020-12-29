@@ -348,7 +348,8 @@ namespace AudioSensor
             float sum = 0;
             for (int i = 0; i < SamplesPerChannel; i++)
             {
-                sum += m_SamplesL[i] * m_SamplesL[i];
+                float mean = GetLRMeanSampleValue(i);
+                sum += mean * mean;
             }
 
             float rms = Mathf.Sqrt(sum / (float)SamplesPerChannel);
