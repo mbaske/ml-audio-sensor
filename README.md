@@ -66,7 +66,7 @@ Whether to observe the left and right audio channels separately (stereo) or comb
 
 ### Sample Type
 
-Whether to sample spectrum or amplitude data. `Spectrum` allows for fine-tuned control over the observed frequency range and can help reducing observation sizes this way. It is less accurate with regard to timing though, as spectrum data represents a 20ms snapshot. I'm not sure how well Unity simulates interaural time differences for stereo signals, but 20ms would normally be way too long of an interval for discerning where a signal is coming from. The agent can only rely on level differences between the left and right channels for localizing an audio source. The `Amplitude` option should be more precise in this regard, but it has a fixed sample size and doesn't support constraining the observed frequencies. Then again, you could just add low and high pass filters to the audio listener for that.
+Whether to sample spectrum or amplitude data. `Spectrum` allows for fine-tuned control over the observed frequency range and can help reducing observation sizes this way. It is less accurate with regard to timing though, as spectrum data represents a 20ms snapshot. I'm not sure how well Unity simulates interaural time differences for stereo signals, but 20ms would normally be way too long of an interval for discerning where a signal is coming from. The agent can only rely on level differences between the left and right channels for localizing an audio source. The `Amplitude` option should be more precise in this regard, but it has a fixed observation size and doesn't support constraining the observed frequencies. Then again, you could just add low and high pass filters to the audio listener for that.
 
 ### FFT Window
 
