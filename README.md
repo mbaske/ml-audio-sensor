@@ -115,7 +115,7 @@ Upping the floor increases dynamics, quieter signals might disappear though. Twe
 
 ![Amplitude](Images/sensor_fft_med_floor.png)
 
-For normalizing samples, the sensor needs to detect their peak values first. A flashing red bar at the top of the graph indicates that normalization is currently being fitted to the signal. Press the `Reset` button to clear all measured peaks and start over. Changing `Signal Type`, `FFT Window`, `FFT Resolution` or `Floor` settings will also invalidate the current values.
+For normalizing samples, the sensor needs to detect their peak values first. A flashing red bar at the top of the graph indicates that normalization is currently being fitted to the signal. Press the `Reset` button to clear all measured peaks and start over. Changing `Signal Type`, `FFT Window`, `FFT Resolution` or `Floor` settings will reset normalization as well.
 
 Normalization *increases* the dynamic range, as it multiplies sample values with an expansion factor.
 
@@ -142,7 +142,5 @@ A meowing cat and a barking dog are moving around constantly. The stationary age
 <br/><br/>
 
 ## Issues
-
-Since training is limited to one agent in real time, I was hoping to at least train with multiple executables in parallel. However, launching even a single exe from the python console quit with an EOF / broken pipe error. I wonder if there might be something off with my observation encoding or PNG compression - although strangely, I haven't had any problems when training in the Unity editor. [These](https://github.com/Unity-Technologies/ml-agents/issues/4061) [issues](https://github.com/Unity-Technologies/ml-agents/issues/3805) sound like they could be related, but I'm not sure. Please let me know if anyone has some insight into what might be causing this.
 
 The application target framerate has to match the capture framerate. Failing to set the correct target framerate causes the [fixed unscaled delta time](https://docs.unity3d.com/ScriptReference/Time-fixedUnscaledDeltaTime.html) to be shorter than expected, resulting in audio weirdness ([related issue](https://github.com/Unity-Technologies/ml-agents/issues/1302)). This threw me off at first, now I always pass `--capture-frame-rate=50 --target-frame-rate=50` with my mlagents-learn parameters. I picked 50 fps because it matches the fixed update loop, but 30 or 60 fps should also be fine, as long as both numbers are the same.
