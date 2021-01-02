@@ -16,8 +16,7 @@ This is an experimental audio sensor for the [Unity Machine Learning Agents Tool
 
 ## Concept
 
-The [AudioSensorComponent](https://github.com/mbaske/ml-audio-sensor/blob/master/Assets/Scripts/AudioSensor/AudioSensorComponent.cs) is responsible for sampling in-game audio and for writing the processed samples to the [AudioBuffer](https://github.com/mbaske/ml-audio-sensor/blob/master/Assets/Scripts/AudioSensor/AudioBuffer.cs). It wraps the [AudioSensor](https://github.com/mbaske/ml-audio-sensor/blob/master/Assets/Scripts/AudioSensor/AudioSensor.cs) which in turn reads from the buffer and generates observations. Audio signals have to be sampled continuously - splitting the sensor code this way serves to decouple the sampling frequency from the agent's decision interval.
-To that end, the sensor component implements its own updater, triggered by the Academy's `AgentPreStep` event. Agent steps execute on the FixedUpdate loop, every 20ms or at 50fps with default time settings.
+The [AudioSensorComponent](https://github.com/mbaske/ml-audio-sensor/blob/master/Assets/Scripts/AudioSensor/AudioSensorComponent.cs) is responsible for sampling in-game audio and for writing the processed samples to the [AudioBuffer](https://github.com/mbaske/ml-audio-sensor/blob/master/Assets/Scripts/AudioSensor/AudioBuffer.cs). It wraps the [AudioSensor](https://github.com/mbaske/ml-audio-sensor/blob/master/Assets/Scripts/AudioSensor/AudioSensor.cs) which in turn reads from the buffer and generates observations. Audio signals have to be sampled continuously - splitting the sensor code this way serves to decouple the sampling frequency from the agent's decision interval. To that end, the sensor component implements its own updater, triggered by the Academy's `AgentPreStep` event.
 <br/><br/>
 
 ## Limitations
@@ -26,7 +25,7 @@ Audio in Unity runs on its own thread, unaffected by the the global [time scale]
 
 There can only be one [audio listener](https://docs.unity3d.com/ScriptReference/AudioListener.html) in a scene, which means training and inference are limited to a single agent per environment - *if* that agent can influence the audio it listens to (like changing its position relative to a sound source).
 
-Training with multiple agent instances is possible, as long as the observed audio is unaffected by their actions. In that case, adding a sensor to every agent would be pretty wasteful however, because each individual sensor instance would process identical signals. A more resource frienly approach is using *audio sensor proxies* instead. A sensor proxy merely refers method calls to a central audio sensor, which is attached to only one of the agents. This agent's sensor caches its observations, so they can be accessed by the proxies. The only catch here is that sensors are queried in the same order as agents were originally enabled. Therefore you'll need to make sure the listening agent is enabled first. I recommend keeping all other agents disabled by default, and letting the [ProxyEnabler]() script activate them automatically. The [speech recognition example](#Examples) uses this approach.
+Training with multiple agent instances is possible, as long as the observed audio is unaffected by their actions. In that case, adding a sensor to every agent would be pretty wasteful however, because each individual sensor instance would process identical signals. A more resource frienly approach is using *audio sensor proxies* instead. A sensor proxy merely refers method calls to a central audio sensor, which is attached to only one of the agents. This agent's sensor caches its observations, so they can be accessed by the proxies. The only catch here is that sensors are queried in the same order as agents were originally enabled. Therefore you'll need to make sure the listening agent is enabled first. I recommend keeping all other agents disabled by default, and letting the [ProxyEnabler](https://github.com/mbaske/ml-audio-sensor/blob/main/Assets/Scripts/AudioSensor/Util/ProxyEnabler.cs) script activate them automatically. The [speech recognition example](#Examples) uses this approach.
 <br/><br/>
 
 ## Settings 
@@ -39,9 +38,9 @@ Mono:   10 batches * 1024 samples => 10 channels * 32 (width) * 32 (height)
 Stereo: 10 batches * 2048 samples => 20 channels * 32 (width) * 32 (height)
 ```
 
-When sampling spectrum data, a batch contains values for a set number of frequency bands, representing a spectrum snapshot over that time period. If we sample raw amplitude values on the other hand, the number of samples depends on the system's sample rate. Unity on Windows uses 48kHz, a 20ms batch should therefore contain 48000 * 0.02 = 960 samples per channel. However, [GetOutputData](https://docs.unity3d.com/ScriptReference/AudioListener.GetOutputData.html) requires sample sizes of a power of 2, so we actually sample 1024 values, resulting in a small overlap between batches. Alternatively, one could fill the buffer from the audio thread, using [OnAudioFilterRead](https://docs.unity3d.com/ScriptReference/MonoBehaviour.OnAudioFilterRead.html). I've opted for the main thread though, because it's easier to keep sample data synced with the agent loop this way.
+When sampling spectrum data, a batch contains values for a set number of frequency bands, representing a spectrum snapshot over that time period. If we sample amplitude values on the other hand, the number of samples depends on the system's sample rate. Unity on Windows uses 48kHz, a 20ms batch should therefore contain 48000 * 0.02 = 960 samples per channel. However, [GetOutputData](https://docs.unity3d.com/ScriptReference/AudioListener.GetOutputData.html) requires sample sizes of a power of 2, so we actually sample 1024 values, resulting in a small overlap between batches. Alternatively, one could fill the buffer from the audio thread, using [OnAudioFilterRead](https://docs.unity3d.com/ScriptReference/MonoBehaviour.OnAudioFilterRead.html). I've opted for the main thread though, because it's easier to keep buffer contents synced with the agent loop this way.
 
-Since the audio sensor component implements its own update mechanism based on `AgentPreStep` events, I recommend binding agent decisions to those updates, rather than using the ML-Agents decision requester component. The audio sensor component dispatches a `SamplingUpdateEvent`, containing the current sampling step count with respect to to the buffer length. The agent should listen to this event and request decisions accordingly, as the latest batch of audio samples will be available when it is invoked. Check out the [example projects](#Examples) for how this can be implemented in practice.
+Since the audio sensor component implements its own update mechanism based on `AgentPreStep` events, I recommend binding agent decisions to those updates, rather than using the ML-Agents decision requester component. The audio sensor component dispatches a `SamplingUpdateEvent`, containing the current sampling step count with respect to to the buffer length. The agent should listen to this event and request decisions accordingly, as the latest sample batch will be available when it is invoked. Check out the [example projects](#Examples) for how this can be implemented in practice.
 
 To enable **observation stacking**, set the buffer length to `decision interval * stacking size`. Buffer contents are read from oldest to newest. With a decision interval of 5 and a buffer length of 10 for instance, the agent would observe the following sample batches, corresponding to a stacking size of 2.
 ```
@@ -67,7 +66,7 @@ Whether to observe the left and right audio channels separately (stereo) or comb
 
 ### Sample Type
 
-Whether to sample spectrum or amplitude data. `Spectrum` allows for fine-tuned control over the observed frequency range and can help reducing observation sizes this way. It is less accurate with regard to timing though, as spectrum data represents a 20ms snapshot. I'm not sure how well Unity simulates interaural time differences for stereo signals, but 20ms would normally be way too long of an interval for discerning where a signal is coming from. The agent can only rely on level differences between the left and right channels for localizing an audio source. The `Amplitude` option should be more precise in this regard, but it has a fixed sample size and doesn't support constraining the observed frequencies. Then again, you could just add low and high pass filters to the audio listener for that.
+Whether to sample spectrum or amplitude data. `Spectrum` allows for fine-tuned control over the observed frequency range and can help reducing observation sizes this way. It is less accurate with regard to timing though, as spectrum data represents a 20ms snapshot. I'm not sure how well Unity simulates interaural time differences for stereo signals, but 20ms would normally be way too long of an interval for discerning where a signal is coming from. The agent can only rely on level differences between the left and right channels for localizing an audio source. The `Amplitude` option should be more precise in this regard, but it has a fixed observation size and doesn't support constraining the observed frequencies. Then again, you could just add low and high pass filters to the audio listener for that.
 
 ### FFT Window
 
@@ -93,7 +92,8 @@ scaled amplitude = max(dB, floor) / -floor + 1
 
 Whether to normalize the samples. Normalization is implemented as upward expansion over the full dynamic range, based on the measured signal peaks. When sampling spectrum data, each FFT band is normalized individually.
 ```
-normalized amplitude = scaled amplitude * 0.99 / measured peak of scaled amplitudes
+expansion factor = 0.99 / measured peak of scaled amplitudes
+normalized amplitude = scaled amplitude * expansion factor
 ```
 <br/>
 
@@ -111,11 +111,11 @@ A low `Floor` value results in a higher average level, but with little dynamic r
 
 ![Amplitude](Images/sensor_fft_low_floor.png)
 
-Upping the floor value increases dynamics, quieter signals might disappear though. Tweak this value with different sounds the agent is expected to hear during training, in order to achieve an expressive dynamic range. The observation preview texture reflects signal dynamics as well.
+Upping the floor increases dynamics, quieter signals might disappear though. Tweak this value with different sounds the agent is expected to hear during training, in order to achieve an expressive dynamic range. The observation preview texture reflects signal dynamics as well.
 
 ![Amplitude](Images/sensor_fft_med_floor.png)
 
-For normalizing samples, the sensor needs to detect their peak values first. A flashing red bar at the top of the graph indicates that normalization is currently being fitted to the signal. Press the `Reset` button to clear all measured peaks and start over. Changing `Signal Type`, `FFT Window`, `FFT Resolution` or `Floor` settings will also invalidate the current values.
+For normalizing samples, the sensor needs to detect their peak values first. A flashing red bar at the top of the graph indicates that normalization is currently being fitted to the signal. Press the `Reset` button to clear all measured peaks and start over. Changing `Signal Type`, `FFT Window`, `FFT Resolution` or `Floor` settings will reset normalization as well.
 
 Normalization *increases* the dynamic range, as it multiplies sample values with an expansion factor.
 
@@ -123,7 +123,7 @@ Normalization *increases* the dynamic range, as it multiplies sample values with
 
 **Don't forget to copy your updated settings with 'Copy Component' while still in play mode. Back in editor mode, save them with 'Paste Component Values'.**
 
-Note that any changes which result in a different observation size can cause errors if the agent is in training or inference mode, because the model then no longer matches the new settings.
+Note that any changes which result in a different observation size can cause errors while the agent is in training or inference mode, because the model then no longer matches the new settings.
 
 Calibration creates some overhead at each sampling step and should be disabled during training.
 <br/><br/>
@@ -142,7 +142,5 @@ A meowing cat and a barking dog are moving around constantly. The stationary age
 <br/><br/>
 
 ## Issues
-
-Since training is limited to one agent in real time, I was hoping to at least train with multiple executables in parallel. However, launching even a single exe from the python console quit with an EOF / broken pipe error. I wonder if there might be something off with my observation encoding or PNG compression - although strangely, I haven't had any problems when training in the Unity editor. [These](https://github.com/Unity-Technologies/ml-agents/issues/4061) [issues](https://github.com/Unity-Technologies/ml-agents/issues/3805) sound like they could be related, but I'm not sure. Please let me know if anyone has some insight into what might be causing this.
 
 The application target framerate has to match the capture framerate. Failing to set the correct target framerate causes the [fixed unscaled delta time](https://docs.unity3d.com/ScriptReference/Time-fixedUnscaledDeltaTime.html) to be shorter than expected, resulting in audio weirdness ([related issue](https://github.com/Unity-Technologies/ml-agents/issues/1302)). This threw me off at first, now I always pass `--capture-frame-rate=50 --target-frame-rate=50` with my mlagents-learn parameters. I picked 50 fps because it matches the fixed update loop, but 30 or 60 fps should also be fine, as long as both numbers are the same.
