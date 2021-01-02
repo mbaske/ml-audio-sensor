@@ -293,6 +293,7 @@ namespace AudioSensor
 
         private void Awake()
         {
+            UpdateSettings();
             Academy.Instance.AgentPreStep += OnAgentPreStep;
         }
 
