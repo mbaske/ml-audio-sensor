@@ -2,7 +2,7 @@
 using Unity.MLAgents.Policies;
 using UnityEngine;
 
-namespace AudioSensor.Util
+namespace MBaske.Sensors.Util
 {
     /// <summary>
     /// Enables all agents containing an <see cref="AudioSensorComponentProxy"/> during training.

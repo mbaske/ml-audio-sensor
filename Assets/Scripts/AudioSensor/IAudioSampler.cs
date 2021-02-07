@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AudioSensor
+namespace MBaske.Sensors
 {
     /// <summary>
     /// Interface implemented by <see cref="AudioSensorComponent"/> 

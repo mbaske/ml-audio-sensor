@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System;
 using UnityEngine;
-using AudioSensor.Util;
+using MBaske.Sensors.Util;
 
-namespace AudioSensor
+namespace MBaske.Sensors
 {
     /// <summary>
     /// Sensor class for observing audio signals.

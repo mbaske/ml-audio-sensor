@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using UnityEngine;
 
-namespace AudioSensor.Util
+namespace MBaske.Sensors.Util
 {
     /// <summary>
     /// Utility class for encoding audio samples as textures.

@@ -3,9 +3,9 @@ using Unity.MLAgents;
 using Unity.MLAgents.Sensors;
 using System.Linq;
 using System;
-using AudioSensor.Util;
+using MBaske.Sensors.Util;
 
-namespace AudioSensor
+namespace MBaske.Sensors
 {
     /// <summary>
     /// Component that wraps an <see cref="AudioSensor"/>.
@@ -13,6 +13,7 @@ namespace AudioSensor
     /// and for writing it to the <see cref="AudioBuffer"/>. The wrapped sensor generates observations 
     /// from the buffer contents.
     /// </summary>
+    [HelpURL("https://github.com/mbaske/ml-audio-sensor")]
     public class AudioSensorComponent : SensorComponent, IAudioSampler
     {
         #region Editor Settings
@@ -26,6 +27,7 @@ namespace AudioSensor
             set { m_SensorName = value; }
         }
         [HideInInspector, SerializeField]
+        [Tooltip("Name of the generated Audio Sensor.")]
         private string m_SensorName = "AudioSensor";
 
 
@@ -39,6 +41,7 @@ namespace AudioSensor
             set { m_BufferLength = value; }
         }
         [HideInInspector, SerializeField]
+        [Tooltip("Length of the buffer in update / sampling steps.")]
         private int m_BufferLength = 1;
 
 
@@ -51,6 +54,7 @@ namespace AudioSensor
             set { m_CompressionType = value; }
         }
         [HideInInspector, SerializeField]
+        [Tooltip("The compression type to use for the sensor.")]
         private SensorCompressionType m_CompressionType = SensorCompressionType.None;
 
 
@@ -63,6 +67,7 @@ namespace AudioSensor
             set { m_SignalType = value; }
         }
         [HideInInspector, SerializeField]
+        [Tooltip("The signal type (mono or stereo) to use for the sensor.")]
         private SignalType m_SignalType = SignalType.Stereo;
 
 
@@ -75,6 +80,7 @@ namespace AudioSensor
             set { m_SampleType = value; }
         }
         [HideInInspector, SerializeField]
+        [Tooltip("The sample type (amplitude or spectrum) to use for the sensor.")]
         private SampleType m_SampleType = SampleType.Spectrum;
 
 
@@ -87,6 +93,7 @@ namespace AudioSensor
             set { m_FFTWindow = value; }
         }
         [HideInInspector, SerializeField]
+        [Tooltip("The FFTWindow for sampling spectrum data.")]
         private FFTWindow m_FFTWindow = FFTWindow.Rectangular;
 
 
@@ -103,6 +110,7 @@ namespace AudioSensor
             set { m_FFTBitWidth = (int)Mathf.Log(value, 2); }
         }
         [HideInInspector, SerializeField]
+        [Tooltip("The number of FFT bands when sampling spectrum data.")]
         private int m_FFTBitWidth = 10;
 
 
@@ -120,6 +128,7 @@ namespace AudioSensor
             set { m_FFTMinFreqLog = Mathf.Log(value, 10); }
         }
         [HideInInspector, SerializeField]
+        [Tooltip("The lowest observed frequency when sampling spectrum data.")]
         private float m_FFTMinFreqLog = Frequeny.Log20Hz;
 
 
@@ -137,6 +146,7 @@ namespace AudioSensor
             set { m_FFTMaxFreqLog = Mathf.Log(value, 10); }
         }
         [HideInInspector, SerializeField]
+        [Tooltip("The highest observed frequency when sampling spectrum data.")]
         private float m_FFTMaxFreqLog = Frequeny.Log20kHz;
 
 
@@ -180,6 +190,7 @@ namespace AudioSensor
             set { m_Normalize = value; }
         }
         [HideInInspector, SerializeField]
+        [Tooltip("Whether to normalize the samples.")]
         private bool m_Normalize;
 
         #endregion

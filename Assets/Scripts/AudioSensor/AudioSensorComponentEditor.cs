@@ -1,9 +1,9 @@
 ﻿#if (UNITY_EDITOR)
 using UnityEditor;
 using UnityEngine;
-using AudioSensor.Util;
+using MBaske.Sensors.Util;
 
-namespace AudioSensor
+namespace MBaske.Sensors
 {
     /// <summary>
     /// Custom editor for the <see cref="AudioSensorComponent"/>.

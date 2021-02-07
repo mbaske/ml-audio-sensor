@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace AudioSensor.Util
+namespace MBaske.Sensors.Util
 {
     /// <summary>
     /// Utility class for audio processing.

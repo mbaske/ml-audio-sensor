@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace AudioSensor
+namespace MBaske.Sensors
 {
     /// <summary>
     /// SignalType.Stereo samples left and right channel values sparately.

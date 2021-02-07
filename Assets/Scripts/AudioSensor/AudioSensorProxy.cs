@@ -1,6 +1,6 @@
 ﻿using Unity.MLAgents.Sensors;
 
-namespace AudioSensor
+namespace MBaske.Sensors
 {
     /// <summary>
     /// Sensor proxy that refers to an <see cref="AudioSensor"/>.
