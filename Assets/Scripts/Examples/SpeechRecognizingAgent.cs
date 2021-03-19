@@ -94,7 +94,7 @@ public class SpeechRecognizingAgent : AudioAgent
     }
 
     /// <inheritdoc/>
-    public override void Heuristic(float[] actionsOut) { }
+    public override void Heuristic(in ActionBuffers actionsOut) { }
 
     private void InitGUIStyles()
     {

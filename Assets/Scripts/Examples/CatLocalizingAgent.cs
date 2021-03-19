@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using Unity.MLAgents.Actuators;
 using System.Collections.Generic;
-using AudioSensor;
+using MBaske.Sensors.Audio;
 
 /// <summary>
 /// Listens to continuous audio.
@@ -55,9 +55,10 @@ public class CatLocalizingAgent : AudioAgent
     }
 
     /// <inheritdoc/>
-    public override void Heuristic(float[] actionsOut) 
+    public override void Heuristic(in ActionBuffers actionsOut) 
     {
-        actionsOut[0] = Input.GetAxis("Horizontal");
+        var actions = actionsOut.ContinuousActions;
+        actions[0] = Input.GetAxis("Horizontal");
     }
 
 

@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using Unity.MLAgents;
 using Unity.MLAgents.Sensors;
-using AudioSensor;
+using Unity.MLAgents.Actuators;
+using MBaske.Sensors.Audio;
 
 /// <summary>
 /// Base class for agents listening to audio.
@@ -42,7 +43,7 @@ public abstract class AudioAgent : Agent
     protected abstract void OnSamplingUpdate(int samplingStepCount, bool bufferLengthReached);
 
     /// <inheritdoc/>
-    public override void Heuristic(float[] actionsOut) { }
+    public override void Heuristic(in ActionBuffers actionsOut) { }
 
     private void OnDestroy()
     {
