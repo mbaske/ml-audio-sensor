@@ -1,6 +1,7 @@
 
 # Audio Sensor for Unity ML-Agents
-This is an experimental audio sensor for the [Unity Machine Learning Agents Toolkit](https://github.com/Unity-Technologies/ml-agents). 
+This is an experimental audio sensor for the [Unity Machine Learning Agents Toolkit](https://github.com/Unity-Technologies/ml-agents).  
+It is compatible with [v1.9.0 / release 15](https://github.com/Unity-Technologies/ml-agents/releases/tag/release_15).
 
 * [Concept](#Concept)  
 * [Limitations](#Limitations)
