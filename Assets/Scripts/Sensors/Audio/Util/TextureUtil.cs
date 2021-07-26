@@ -34,7 +34,7 @@ namespace MBaske.Sensors.Audio.Util
             int w = shape.Width;
             int h = shape.Height;
 
-            // TODO Can we encode values in the texture's alpha channel?
+            // TODO https://github.com/Unity-Technologies/ml-agents/issues/5445
             var colors = texture.GetPixels32();
 
             for (int col = 0; col < channelsPerTexture; col++)

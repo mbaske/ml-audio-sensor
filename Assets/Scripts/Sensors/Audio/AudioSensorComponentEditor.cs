@@ -209,7 +209,7 @@ Please disable calibration during training for better performance.";
 
                 EditorGUILayout.BeginHorizontal();
                 {
-                    var info = $"{m_Component.Shape} ({m_Component.SamplesPerChannel} Samples per channel)\nRequired min.: Resnet 15x15, Simple 20x20, Nature CNN 36x36";
+                    var info = $"{m_Component.Shape} ({m_Component.SamplesPerChannel} Samples per channel)";
                     GUILayout.Label(info);
                     GUILayout.FlexibleSpace();
 
@@ -273,7 +273,7 @@ Please disable calibration during training for better performance.";
                 GL.PushMatrix();
 
                 GL.Clear(true, false, Color.black);
-                UI.GLMaterial.SetPass(0);
+                EditorUtil.GLMaterial.SetPass(0);
 
                 GL.Begin(GL.QUADS);
                 GL.Color(Color.black);

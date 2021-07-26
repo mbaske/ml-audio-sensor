@@ -14,7 +14,7 @@ namespace MBaske.Sensors.Audio
     /// from the buffer contents.
     /// </summary>
     [HelpURL("https://github.com/mbaske/ml-audio-sensor")]
-    public class AudioSensorComponent : SensorComponent, IAudioSampler
+    public class AudioSensorComponent : SensorComponent, IAudioSampler, IDisposable
     {
         #region Editor Settings
 
@@ -289,26 +289,17 @@ namespace MBaske.Sensors.Audio
 
 
         /// <inheritdoc/>
-        public override int[] GetObservationShape()
-        {
-            return m_Shape.ToArray();
-        }
-
-        /// <inheritdoc/>
-        public override ISensor CreateSensor()
+        public override ISensor[] CreateSensors()
         {
             Sensor = new AudioSensor(m_Shape, m_CompressionType, SensorName);
             Sensor.ResetEvent += OnSensorReset;
-            return Sensor;
+            return new ISensor[] { Sensor };
         }
 
-        private void Awake()
-        {
-            UpdateSettings();
-            Academy.Instance.AgentPreStep += OnAgentPreStep;
-        }
-
-        private void OnDestroy()
+        /// <summary>
+        /// Cleans up internal objects.
+        /// </summary>
+        public void Dispose()
         {
             if (Academy.IsInitialized)
             {
@@ -317,7 +308,19 @@ namespace MBaske.Sensors.Audio
             if (Sensor != null)
             {
                 Sensor.ResetEvent -= OnSensorReset;
+                Sensor.Dispose();
             }
+        }
+
+        private void Awake()
+        {
+            UpdateSettings();
+            Academy.Instance.AgentPreStep += OnAgentPreStep;
+        }
+        
+        private void OnDestroy()
+        {
+            Dispose();
         }
 
         private void OnAgentPreStep(int academyStepCount)

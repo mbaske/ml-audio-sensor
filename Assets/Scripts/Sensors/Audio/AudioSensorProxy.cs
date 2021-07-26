@@ -28,15 +28,15 @@ namespace MBaske.Sensors.Audio
         }
 
         /// <inheritdoc/>
-        public int[] GetObservationShape()
+        public ObservationSpec GetObservationSpec()
         {
-            return m_AudioSensor.Shape.ToArray();
+            return m_AudioSensor.GetObservationSpec();
         }
 
         /// <inheritdoc/>
-        public SensorCompressionType GetCompressionType()
+        public CompressionSpec GetCompressionSpec()
         {
-            return m_AudioSensor.CompressionType;
+            return m_AudioSensor.GetCompressionSpec();
         }
 
         /// <inheritdoc/>
